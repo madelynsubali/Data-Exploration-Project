@@ -1,0 +1,27 @@
+install.packages(c('purrr','lubridate'))
+
+library(tidyverse)
+library(fixest)
+library(ggstance)
+library(vtable)
+library(multcomp)
+library(purrr)
+library(lubridate)
+
+#Reading in Google Trends Data
+trends_up_to_ <- list.files(path = "the folder name" , full.names=TRUE)
+
+trends_up_to_ %>% map_df(read_csv)
+
+#Aggregating the Google Trends Data: 
+    "Getting date data"
+str_sub(monthorweek, 1, 10)
+ymd(monthorweek) 
+
+  "If you want to aggregate the dates further,set units to 'month' "
+floor_date(monthorweek, unit='month') 
+
+  "Aggregating"
+
+
+

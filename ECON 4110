@@ -9,7 +9,7 @@ library(purrr)
 library(lubridate)
 
 #Reading in Google Trends Data
-trends_up_to_ <- list.files(path = "the folder name" , full.names=TRUE)
+trends_up_to_ <- list.files(path = "the folder name" , pattern='trends_', full.names=TRUE)
 
 trends_up_to_ %>% map_df(read_csv)
 

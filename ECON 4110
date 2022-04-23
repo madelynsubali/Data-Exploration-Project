@@ -9,9 +9,11 @@ library(purrr)
 library(lubridate)
 
 #Reading in Google Trends Data
-trends_files <- list.files(path = 'Lab3_Rawdata' , pattern='trends_', full.names=TRUE)
+trends_files <- list.files(path = '.' , pattern='trends_', full.names=TRUE)
 
 trends_files <- map_df(trends_files, read_csv) 
+
+trends_files
 
 #Aggregating the Google Trends Data: 
 "Getting date data"
@@ -24,7 +26,9 @@ trends_files %>%
   group_by(schname, keyword) %>%
   mutate(index_id = mean(index)/sd(index))
 
-               
+"Reading in Scorecard Data"
+score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
+id_name_link <- read_csv('id_name_link.csv')
 
 
 

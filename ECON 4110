@@ -9,22 +9,21 @@ library(purrr)
 library(lubridate)
 
 #Reading in Google Trends Data
-trends_files <- list.files(path = "the folder name" , pattern='trends_', full.names=TRUE)
+trends_files <- list.files(path = 'Lab3_Rawdata' , pattern='trends_', full.names=TRUE)
 
-trends_files %>% map_df(read_csv)
+trends_files <- map_df(trends_files, read_csv) 
 
 #Aggregating the Google Trends Data: 
-    "Getting date data"
-str_sub(monthorweek, end=10) #QUESTION:How can we get the string; if the files are already aggregated" 
+"Getting date data"
+
+monthorweek <-str_sub(trends_files$monthorweek, 1,10) 
 ymd(monthorweek) 
 
-  "Aggregating"
- trends_files %>% 
-               group_by(sch_name) %>%
-               group_by(keyword) %>% 
-               mutate(index_id = mean(index)/sd(index))
- 
- 
+"Aggregating"
+trends_files %>% 
+  group_by(schname, keyword) %>%
+  mutate(index_id = mean(index)/sd(index))
+
                
 
 

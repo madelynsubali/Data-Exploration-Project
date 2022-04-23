@@ -18,14 +18,12 @@ trends_files %>% map_df(read_csv)
 str_sub(monthorweek, end=10) #QUESTION:How can we get the string; if the files are already aggregated" 
 ymd(monthorweek) 
 
-  "If you want to aggregate the dates further,set units to 'month' "
-floor_date(monthorweek, unit='month') 
-
   "Aggregating"
  trends_files %>% 
                group_by(sch_name) %>%
                group_by(keyword) %>% 
                mutate(index_id = mean(index)/sd(index))
+ 
  
                
 

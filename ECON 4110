@@ -30,5 +30,13 @@ trends_files %>%
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
 id_name_link <- read_csv('id_name_link.csv')
 
+#Merge in the Scorecard Data
+id_name_link %>%
+    group_by(schname) %>% 
+    mutate(n= n()) %>% 
+    filter ( n < 2) 
+
+
+
 
 

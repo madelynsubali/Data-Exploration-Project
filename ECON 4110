@@ -24,7 +24,7 @@ ymd(monthorweek)
 "Aggregating"
 trends_files %>% 
   group_by(schname, keyword) %>%
-  mutate(index_id = mean(index)/sd(index))
+  mutate(index_id = (index-mean(index))/sd(index))
 
 "Reading in Scorecard Data"
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')

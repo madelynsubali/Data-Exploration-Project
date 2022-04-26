@@ -39,6 +39,7 @@ id_name_link %>%
 names(score) <- tolower(names(score))
 head(score,10)
 
-id_name_link %>%
-  inner_join(trends_files, by='schname') %>%
-  inner_join(score, by='unitid')
+join_files <- inner_join(id_name_link, trends_files, by='schname')
+final_join <- inner_join(join_files, score, by='unitid')
+
+write_csv(final_join, "clean_data.csv")

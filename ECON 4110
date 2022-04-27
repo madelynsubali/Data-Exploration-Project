@@ -20,6 +20,7 @@ trends_files
 
 monthorweek <-str_sub(trends_files$monthorweek, 1,10) 
 ymd(monthorweek) 
+floor_date(monthorweek, unit= 'month')
 
 "Aggregating"
 trends_files %>% 
@@ -29,6 +30,9 @@ trends_files %>%
 "Reading in Scorecard Data"
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
 id_name_link <- read_csv('id_name_link.csv')
+
+"Dropping variables from Scorecard data to make it smaller" 
+
 
 #Merge in the Scorecard Data:
 id_name_link %>%

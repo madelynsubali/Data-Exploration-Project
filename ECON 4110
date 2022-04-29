@@ -34,16 +34,19 @@ id_name_link <- read_csv('id_name_link.csv')
 "Dropping variables from Scorecard data to make it smaller" 
 
 
-#Merge in the Scorecard Data:
-id_name_link %>%
-  group_by(schname) %>% 
-  mutate(n= n()) %>% 
-  filter ( n < 2)
+'Remove university that share the same schname' 
+id_name_link <- id_name_link %>%
+                  group_by(schname) %>% 
+                  mutate(n= n()) %>% 
+                  filter ( n == 1)
 
+'Make column name to lower case to match with id_name_link file'
 names(score) <- tolower(names(score))
 head(score,10)
 
+'Merging the scorecard data'
 join_files <- inner_join(id_name_link, trends_files, by='schname')
 final_join <- inner_join(join_files, score, by='unitid')
 
+'Save into one file' 
 write_csv(final_join, "clean_data.csv")

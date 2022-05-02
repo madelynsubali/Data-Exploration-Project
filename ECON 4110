@@ -50,3 +50,20 @@ final_join <- inner_join(join_files, score, by='unitid')
 
 'Save into one file' 
 write_csv(final_join, "clean_data.csv")
+
+# Analysis 
+
+"According to a 2020 data retrieved from Northeastern University, the median weekly earnings of someone with a Bachelor's degree
+working in the United States is $1,248 with an annual earnings of $64,896." 
+"Retrieve from: https://www.northeastern.edu/bachelors-completion/news/average-salary-by-education-level/" 
+
+"With this in mind, I will make $64,896 as a benchmark. Colleges with a median annual earning of $64,896 or higher 
+as high-earning colleges and below $64,896 as low-earning colleges." 
+
+
+
+
+
+
+
+

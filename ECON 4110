@@ -7,6 +7,7 @@ library(vtable)
 library(multcomp)
 library(purrr)
 library(lubridate)
+library(dplyr)
 
 #Reading in Google Trends Data
 trends_files <- list.files(path = '.' , pattern='trends_', full.names=TRUE)
@@ -40,6 +41,11 @@ id_name_link <- id_name_link %>%
 'Make column name to lower case to match with id_name_link file'
 names(score) <- tolower(names(score))
 head(score,10)
+
+'Removing column names that will not be used to reduce file size' 
+
+score <- score %>%
+                dplyr::select(unitid, opeid,instnm, city, preddeg, sat_avg, ugds, md_earn_wne_p10-reported-earnings, gt_25k_p6)
   
 'Merging the scorecard data'
 join_files <- inner_join(id_name_link, trends_files, by='schname')
@@ -68,9 +74,7 @@ colnames(bachelors_degree_trend)
 #Selecting only columns that we want to use in our data set. 
 
 bachelors_degree_trend <- bachelors_degree_trend %>% select(unitid, opeid, instnm, city, preddeg, sat_avg, 
-                       ugds, md_earn_wne_p10-reported-earnings, gt_25k_p6, medianEarning, index_std)
-
-clean_data <- drop_na(md_earn_wne_p10-reported-earnings) 
+                       ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_std)
 
 # Regression 
 "We are interested on whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."

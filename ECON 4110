@@ -31,9 +31,6 @@ trends_files %>%
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
 id_name_link <- read_csv('id_name_link.csv')
 
-"Dropping variables from Scorecard data to make it smaller" 
-
-
 'Remove university that share the same schname' 
 id_name_link <- id_name_link %>%
                   group_by(schname) %>% 
@@ -43,7 +40,7 @@ id_name_link <- id_name_link %>%
 'Make column name to lower case to match with id_name_link file'
 names(score) <- tolower(names(score))
 head(score,10)
-
+  
 'Merging the scorecard data'
 join_files <- inner_join(id_name_link, trends_files, by='schname')
 final_join <- inner_join(join_files, score, by='unitid')
@@ -59,6 +56,24 @@ working in the United States is $1,248 with an annual earnings of $64,896."
 
 "With this in mind, I will make $64,896 as a benchmark. Colleges with a median annual earning of $64,896 or higher 
 as high-earning colleges and below $64,896 as low-earning colleges." 
+
+#Filter college for bachelor's degree and removing NA values. 
+bachelors_degree_trend <- clean_data %>% filter(preddeg == 3, na.rm=TRUE) 
+
+#Creating dummy variables with ifelse() function to set the benchmark, where '1' is high-earning and '0' is low-earning. 
+bachelors_degree_trend$medianEarning <- ifelse(bachelors_degree_trend$md_earn_wne_p10-reported-earnings >= 64896, '1', '0') 
+
+colnames(bachelors_degree_trend) 
+
+#Selecting only columns that we want to use in our data set. 
+
+bachelors_degree_trend <- bachelors_degree_trend %>% select(unitid, opeid, instnm, city, preddeg, sat_avg, 
+                       ugds, md_earn_wne_p10-reported-earnings, gt_25k_p6, medianEarning, index_std)
+
+clean_data <- drop_na(md_earn_wne_p10-reported-earnings) 
+
+
+
 
 
 

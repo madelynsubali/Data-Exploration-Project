@@ -72,7 +72,8 @@ bachelors_degree_trend <- bachelors_degree_trend %>% select(unitid, opeid, instn
 
 clean_data <- drop_na(md_earn_wne_p10-reported-earnings) 
 
-
+# Regression 
+"We are interested on whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
 
 
 

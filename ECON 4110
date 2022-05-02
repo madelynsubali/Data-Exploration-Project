@@ -77,7 +77,7 @@ bachelors_degree_trend <- bachelors_degree_trend %>% select(unitid, opeid, instn
                        ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_std)
 
 # Regression 
-"We are interested on whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
+"The regression is going to test whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
 
 
 

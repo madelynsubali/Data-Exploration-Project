@@ -92,11 +92,12 @@ export_summs(m1)
 iplot(m1)
 
 
-m2 <- feols(index_std 
+#Visualization 
+
 ggplot(clean_data, aes(x=md_earn_wne_p10-reported-earnings, y=index_std)) + geom_point() + geom_smooth(method= 'lm') + 
       labs(x='Median Earnings', y= index_std', title='..') + geom_vline(aes(md_earn_wne_p10-reported-earnings=64896))
 
-
+QUESTION: -- should the visualization be the regression?-- 
 
 
 

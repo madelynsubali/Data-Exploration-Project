@@ -89,7 +89,11 @@ clean_data <- clean_data %>%
 
 m1 <- feols(index_std ~ earning*SAT, data=clean_data) 
 export_summs(m1) 
+iplot(m1)
 
+
+m2 <- feols(index_std 
+ggplot(clean_data, aes(x=slim, y=index_std)) + geom_point() + geom_smooth(method= 'lm')
 
 
 

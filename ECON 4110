@@ -7,6 +7,7 @@ library(multcomp)
 library(purrr)
 library(lubridate)
 library(dplyr)
+library(jtools)
 
 #Reading in Google Trends Data
 trends_files <- list.files(path = '.' , pattern='trends_', full.names=TRUE)
@@ -20,12 +21,12 @@ trends_files
 
 monthorweek <-str_sub(trends_files$monthorweek, 1,10) 
 ymd(monthorweek) 
-floor_date(monthorweek, unit= 'month')
+# floor_date(monthorweek, 'month')
 
 "Aggregating"
-trends_files %>% 
-  group_by(schname, keyword) %>%
-  mutate(index_id = (index-mean(index))/sd(index))
+trends_files <- trends_files %>% 
+                group_by(schname, keyword) %>%
+                mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
 
 "Reading in Scorecard Data"
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
@@ -33,19 +34,23 @@ id_name_link <- read_csv('id_name_link.csv')
 
 'Remove university that share the same schname' 
 id_name_link <- id_name_link %>%
-                  group_by(schname) %>% 
-                  mutate(n= n()) %>% 
-                  filter ( n == 1)
+                group_by(schname) %>% 
+                mutate(n= n()) %>% 
+                filter ( n == 1)
 
 'Make column name to lower case to match with id_name_link file'
 names(score) <- tolower(names(score))
 head(score,10)
 
-'Removing column names that will not be used to reduce file size' 
+str(score$`md_earn_wne_p10-reported-earnings`)
 
-score <- score %>%
-                dplyr::select(unitid, opeid,instnm, city, preddeg, sat_avg, ugds, md_earn_wne_p10-reported-earnings, gt_25k_p6)
-  
+'Removing column names that will not be used to reduce file size' 
+#score <- score %>%
+#  dplyr::select(unitid, opeid,instnm, city, preddeg, sat_avg, ugds, md_earn_wne_p10-reported-earnings, gt_25k_p6)
+
+#ga perlu mungkin
+
+view(score)
 'Merging the scorecard data'
 join_files <- inner_join(id_name_link, trends_files, by='schname')
 final_join <- inner_join(join_files, score, by='unitid')
@@ -63,17 +68,19 @@ working in the United States is $1,248 with an annual earnings of $64,896."
 as high-earning colleges and below $64,896 as low-earning colleges." 
 
 #Filter college for bachelor's degree and removing NA values. 
+clean_data <- read_csv('clean_data.csv')
 bachelors_degree_trend <- clean_data %>% filter(preddeg == 3, na.rm=TRUE) 
 
 #Creating dummy variables with ifelse() function to set the benchmark, where '1' is high-earning and '0' is low-earning. 
-bachelors_degree_trend$medianEarning <- ifelse(bachelors_degree_trend$md_earn_wne_p10-reported-earnings >= 64896, '1', '0') 
+bachelors_degree_trend$medianEarning <- ifelse(bachelors_degree_trend$`md_earn_wne_p10-reported-earnings` >= 64896, '1', '0') 
 
 colnames(bachelors_degree_trend) 
 
 #Selecting only columns that we want to use in our data set. 
 
-bachelors_degree_trend <- bachelors_degree_trend %>% select(unitid, opeid, instnm, city, preddeg, sat_avg, 
-                       ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_std)
+bachelors_degree_trend <- bachelors_degree_trend %>% dplyr::select(unitid, opeid.x, instnm, city, preddeg, sat_avg, 
+                                                            ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_id)
+
 
 # Regression 
 "The regression is going to test whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
@@ -83,20 +90,27 @@ of a good SAT score."
 "Retrieve from: https://www.bestcolleges.com/blog/what-is-a-good-sat-score/" 
 
 clean_data <- clean_data %>%
-  mutate(earning = md_earn_wne_p10.reported.earnings >= 64896, SAT = sat_avg >= 1200)
+  mutate(earning = `md_earn_wne_p10-reported-earnings` >= 64896, SAT = sat_avg >= 1200)
+
+m1 <- feols(log(index_id) ~ earning*SAT, data=clean_data) 
+export_summs(m1, digits = 5)
+
+#QUESTION: How do we know which to log? My values above is a little bit too small so I tried to use log for Y. Are there any suggestion?
 
 
-m1 <- feols(index_std ~ earning*SAT, data=clean_data) 
-export_summs(m1) 
-iplot(m1)
+
+
+
+
+
+
 
 
 #Visualization 
 
 ggplot(clean_data, aes(x=md_earn_wne_p10-reported-earnings, y=index_std)) + geom_point() + geom_smooth(method= 'lm') + 
-      labs(x='Median Earnings', y= index_std', title='..') + geom_vline(aes(md_earn_wne_p10-reported-earnings=64896))
+  labs(x='Median Earnings', y= index_std', title='..') + geom_vline(aes(md_earn_wne_p10-reported-earnings=64896))
 
-QUESTION: -- should the visualization be the regression?-- 
 
 
 

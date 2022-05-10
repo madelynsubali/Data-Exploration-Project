@@ -78,11 +78,23 @@ colnames(bachelors_degree_trend)
 
 #Selecting only columns that we want to use in our data set. 
 
-bachelors_degree_trend <- bachelors_degree_trend %>% dplyr::select(unitid, opeid.x, instnm, city, preddeg, sat_avg, 
+bachelors_degree_trend <- bachelors_degree_trend %>% dplyr::select(unitid, opeid.x, instnm, city, monthorweek, preddeg, sat_avg, 
                                                             ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_id)
 
+#Regression 
+"The regression is going to test whether there is an impact on Google Trends index on median earnings on before and after the college scorecard was launched."
+"According to the US department of education, the college scorecard was launched on September 12,2015."
 
-# Regression 
+clean_data <- clean_data %>%
+  mutate(earning = md_earn_wne_p10-reported-earnings >= 64896, post_scorecard = month >= 
+           as.Date("2015-09-12"))
+
+m1 <- feols(index_id ~ earning*post_scorecard, data=clean_data) 
+export_summs(m1, digits = 3)
+
+
+
+# Regression SAT (NOT WHAT WE WANT) 
 "The regression is going to test whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
 "There is no good or bad SAT score since different school require different scores. In this case, we will go for the 75th percentile as percentiles can be used
 to see how well students did compared to other test-takers. In 2021, the 75th percentile total sat score is 1200-1210. With this, we will assume and set 1200 as a benchmark 
@@ -94,11 +106,6 @@ clean_data <- clean_data %>%
 
 m1 <- feols(log(index_id) ~ earning*SAT, data=clean_data) 
 export_summs(m1, digits = 5)
-
-#QUESTION: How do we know which to log? My values above is a little bit too small so I tried to use log for Y. Are there any suggestion?
-
-
-
 
 
 

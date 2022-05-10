@@ -1,4 +1,3 @@
-
 library(tidyverse)
 library(fixest)
 library(ggstance)
@@ -25,8 +24,8 @@ ymd(monthorweek)
 
 "Aggregating"
 trends_files <- trends_files %>% 
-                group_by(schname, keyword) %>%
-                mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
+  group_by(schname, keyword) %>%
+  mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
 
 "Reading in Scorecard Data"
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
@@ -34,9 +33,9 @@ id_name_link <- read_csv('id_name_link.csv')
 
 'Remove university that share the same schname' 
 id_name_link <- id_name_link %>%
-                group_by(schname) %>% 
-                mutate(n= n()) %>% 
-                filter ( n == 1)
+  group_by(schname) %>% 
+  mutate(n= n()) %>% 
+  filter ( n == 1)
 
 'Make column name to lower case to match with id_name_link file'
 names(score) <- tolower(names(score))
@@ -79,45 +78,26 @@ colnames(bachelors_degree_trend)
 #Selecting only columns that we want to use in our data set. 
 
 bachelors_degree_trend <- bachelors_degree_trend %>% dplyr::select(unitid, opeid.x, instnm, city, monthorweek, preddeg, sat_avg, 
-                                                            ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_id)
+                                                                   ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_id)
 
 #Regression 
 "The regression is going to test whether there is an impact on Google Trends index on median earnings on before and after the college scorecard was launched."
 "According to the US department of education, the college scorecard was launched on September 12,2015."
 
 clean_data <- clean_data %>%
-  mutate(earning = md_earn_wne_p10-reported-earnings >= 64896, post_scorecard = month >= 
+  mutate(earning = `md_earn_wne_p10-reported-earnings` >= 64896, post_scorecard = monthorweek >= 
            as.Date("2015-09-12"))
 
 m1 <- feols(index_id ~ earning*post_scorecard, data=clean_data) 
 export_summs(m1, digits = 3)
 
-
-
-# Regression SAT (NOT WHAT WE WANT) 
-"The regression is going to test whether there is an impact on Google Trends index on median earnings as well as sat_avg (SAT average score)."
-"There is no good or bad SAT score since different school require different scores. In this case, we will go for the 75th percentile as percentiles can be used
-to see how well students did compared to other test-takers. In 2021, the 75th percentile total sat score is 1200-1210. With this, we will assume and set 1200 as a benchmark 
-of a good SAT score." 
-"Retrieve from: https://www.bestcolleges.com/blog/what-is-a-good-sat-score/" 
-
-clean_data <- clean_data %>%
-  mutate(earning = `md_earn_wne_p10-reported-earnings` >= 64896, SAT = sat_avg >= 1200)
-
-m1 <- feols(log(index_id) ~ earning*SAT, data=clean_data) 
-export_summs(m1, digits = 5)
-
-
-
-
-
-
-
 #Visualization 
 
-ggplot(clean_data, aes(x=md_earn_wne_p10-reported-earnings, y=index_std)) + geom_point() + geom_smooth(method= 'lm') + 
-  labs(x='Median Earnings', y= index_std', title='..') + geom_vline(aes(md_earn_wne_p10-reported-earnings=64896))
+ggplot(bachelors_degree_trend, aes(x=monthorweek, y=index_id, group=medianEarning)) + geom_line() +
+  scale_x_date(date_breaks = "90 days", date_labels = "%Y") 
 
+"+ geom_smooth(method= 'lm') + 
+  labs(x='Median Earnings', y= index_std', title='..') + geom_vline(aes(md_earn_wne_p10-reported-earnings=64896))"
 
 
 

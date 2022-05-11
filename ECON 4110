@@ -80,6 +80,14 @@ colnames(bachelors_degree_trend)
 bachelors_degree_trend <- bachelors_degree_trend %>% dplyr::select(unitid, opeid.x, instnm, city, monthorweek, preddeg, sat_avg, 
                                                                    ugds, md_earn_wne_p10-reported-earnings, medianEarning, index_id)
 
+# mungkin ga usah.. kurang ngerti carany
+"months <- bachelors_degree_trend %>%
+          mutate(date=as.Date(str_sub(monthorweek, 1, 10))) %>%
+          group_by(schname) %>% 
+          mutate(index_id = (index_id- mean(index_id, na.rm=TURE)/ sd(index_id, na.rm=TRUE))) %>%
+          group_by(month= floor_date(date, 'month'), `md_earn_wne_p10-reported-earnings`, medianEarning) %>%
+          summarize(index_id = mean(index_id, na.rm=TRUE))" 
+
 #Regression 
 "The regression is going to test whether there is an impact on Google Trends index on median earnings on before and after the college scorecard was launched."
 "According to the US department of education, the college scorecard was launched on September 12,2015."

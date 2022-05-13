@@ -79,6 +79,11 @@ as high-earning colleges and below $64,896 as low-earning colleges."
 clean_data <- read_csv('clean_data.csv')
 bachelors_degree_trend <- clean_data %>% filter(preddeg == 3, na.rm=TRUE) 
 
+#DATE VARIABLE CHANGE
+bachelors_degree_trend <- bachelors_degree_trend %>% 
+                          mutate(date= as.Date(str_sub(monthorweek, 1,10))) %>%
+                          ymd(date) 
+                
 #Creating dummy variables with ifelse() function to set the benchmark, where '1' is high-earning and '0' is low-earning. 
 bachelors_degree_trend$medianEarning <- ifelse(bachelors_degree_trend$`md_earn_wne_p10-reported-earnings` >= 64896, '1', '0') 
 

@@ -23,12 +23,18 @@ trends_files
 # ymd(monthorweek) 
 # floor_date(monthorweek, 'month')
 
-"Aggregating"
+"Aggregating" - FOR DATE VARIABLE
 trends_files <- trends_files %>% 
                 mutate(date= as.Date(str_sub(monthorweek, 1,10))) %>%
-                ymd(date)
+                ymd(date) %>%
                 group_by(schname, keyword) %>%
                 mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
+                
+# "Aggregating" - ORIGINAL
+trends_files <- trends_files %>% 
+  group_by(schname, keyword) %>%
+  mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
+
 
 "Reading in Scorecard Data"
 score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')

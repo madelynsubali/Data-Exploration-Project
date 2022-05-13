@@ -1,0 +1,96 @@
+library(tidyverse)
+library(fixest)
+library(ggstance)
+library(vtable)
+library(multcomp)
+library(purrr)
+library(lubridate)
+library(dplyr)
+library(jtools)
+
+#Reading in Google Trends Data
+trends_files <- list.files(path = '.' , pattern='trends_', full.names=TRUE)
+
+trends_files <- map_df(trends_files, read_csv) 
+
+#Aggregating the Google Trends Data: 
+"Getting date data" 
+
+"Aggregating"
+trends_files <- trends_files %>% 
+  group_by(schname, keyword) %>%
+  mutate(index_id = (index - mean(index, na.rm=TRUE)) /sd(index, na.rm=TRUE))
+
+"Reading in Scorecard Data"
+score <- read_csv('Most+Recent+Cohorts+(Scorecard+Elements).csv')
+id_name_link <- read_csv('id_name_link.csv')
+
+'Remove university that share the same schname' 
+id_name_link <- id_name_link %>%
+  group_by(schname) %>% 
+  mutate(n= n()) %>% 
+  filter ( n == 1)
+
+'Make column name to lower case to match with id_name_link file'
+names(score) <- tolower(names(score))
+head(score,10)
+
+str(score$`md_earn_wne_p10-reported-earnings`)
+
+view(score)
+'Merging the scorecard data'
+join_files <- inner_join(id_name_link, trends_files, by='schname')
+final_join <- inner_join(join_files, score, by='unitid')
+
+'Save into one file' 
+write_csv(final_join, "clean_data.csv")
+
+# Analysis 
+
+"According to a 2020 data retrieved from Northeastern University, the median weekly earnings of someone with a Bachelor's degree
+working in the United States is $1,248 with an annual earnings of $64,896." 
+"Retrieve from: https://www.northeastern.edu/bachelors-completion/news/average-salary-by-education-level/" 
+
+"With this in mind, I will make $64,896 as a benchmark. Colleges with a median annual earning of $64,896 or higher 
+as high-earning colleges and below $64,896 as low-earning colleges." 
+
+#Filter college for bachelor's degree and removing NA values. 
+clean_data <- read_csv('clean_data.csv')
+bachelors_degree_trend <- clean_data %>% filter(preddeg == 3, na.rm=TRUE) 
+
+#Creating dummy variables with ifelse() function to set the benchmark, where '1' is high-earning and '0' is low-earning. 
+bachelors_degree_trend$medianEarning <- ifelse(bachelors_degree_trend$`md_earn_wne_p10-reported-earnings` >= 64896, '1', '0') 
+
+
+#Selecting only columns that we want to use in our data set. 
+
+bachelors_degree_trend <- bachelors_degree_trend %>% 
+                          dplyr::select(unitid, opeid.x, instnm, city, monthorweek, preddeg, sat_avg, 
+                                        ugds, `md_earn_wne_p10-reported-earnings`, medianEarning, index_id) %>%
+                          mutate(date= as.Date(str_sub(monthorweek, 1,10))) %>%
+                          group_by(month = floor_date(date, "month"), medianEarning) %>%
+                          summarize(index_id = mean(index_id, na.rm = TRUE))
+
+#Regression 
+"The regression is going to test whether there is an impact on Google Trends index on median earnings on before and after the college scorecard was launched."
+"According to the US department of education, the college scorecard was launched on September 12,2015."
+
+clean_data <- clean_data %>%
+  mutate(earning = `md_earn_wne_p10-reported-earnings` >= 64896, post_scorecard = monthorweek >= 
+           as.Date("2015-09-12"))
+
+m1 <- feols(index_id ~ earning*post_scorecard, data=clean_data) 
+export_summs(m1, digits = 3)
+
+#Visualization 
+"The visualization below will show the impacts of Google Trends index within the years of high-earning and low-earning colleges. 
+Here, high-earning is depicted as '1', while low-earning is depicted as '0'."
+ggplot(bachelors_degree_trend, aes(x=month, y=index_id, color=medianEarning)) + 
+  geom_line(aes(color= medianEarning), size=0.8) +
+  geom_vline(xintercept = as.Date("2015-09-12")) + theme_bw() + guides(color=guide_legend("Median Earning")) +
+  labs(title= "The Impact of Google Trends Index Within the Years for Colleges")
+
+"Interpretation: From the line graph, we can conclude that there is not much difference between the low-earning and high-earning. We can see that both lines 
+follow the pattern. In the date that the college scorecard was launched, we can see an increase but a decrease afterwards.
+This suggest that median earnings for colleges is not impacted by the google trends."
+
